@@ -20,11 +20,11 @@ function ocp4etcdctl {
     oc -n openshift-etcd exec -c "${ETCDCTL_CONTAINER}" "${RUNNING_ETCD_POD}" -- env "ETCDCTL_ENDPOINTS=${ETCDCTL_ENDPOINTS}" etcdctl "$@"
 }
 
-function ocp4chronyd {
+function ocp4nodes {
     for node in ${ALL_CP_NODES}; do
         mkdir -p ${ETCD_LOG_PATH}/${node}
-        echo "INFO: Gathering chronyd logs from node ${node}"
-        oc debug "$node" -- chroot /host journalctl -u chronyd > "${ETCD_LOG_PATH}/${node}/chronyd_journal.txt" 2>&1 || true
+        echo "INFO: Gathering journald logs from node ${node}"
+        oc debug "$node" -- chroot /host journalctl -u chronyd > "${ETCD_LOG_PATH}/${node}/journald.txt" 2>&1 || true
     done
 }
 
@@ -72,7 +72,7 @@ PIDS+=($!)
 
 # ntp status + chronyd logs
 echo "INFO: Gathering chronyd logs and NTP status"
-ocp4chronyd &
+ocp4nodes &
 PIDS+=($!)
 
 echo "INFO: Waiting for etcd info collection to complete ..."
