@@ -22,22 +22,15 @@ function ocp4etcdctl {
 
 function ocp4nodes {
     local bad=(
-        "No route"
+        "No route to host"
         "Connection refused"
         "unreachable"
         "could not resolve"
         "name or service not known"
-        "Offset"
-        "Jitter"
-        "Stratum"
         "fail"
         "unable"
         "not able"
         "unsynchronized"
-        "Loaded configuration"
-        "Starting NTP client/server"
-        "Starting chronyd"
-        "chronyd version"
     )
     local good=(
         "Loaded configuration"
@@ -51,8 +44,8 @@ function ocp4nodes {
         echo "INFO: Gathering journald logs from node ${node}"
         oc debug "$node" -- chroot /host journalctl -u chronyd > "${ETCD_LOG_PATH}/${node}/journald.txt" 2>&1 || true
 
-        grep -i -E "${bad[*]}" "${ETCD_LOG_PATH}/${node}/journald.txt" && echo "ERROR: Found bad entries in journald logs for node ${node}" >&2 || true
-        grep -i -E "${good[*]}" "${ETCD_LOG_PATH}/${node}/journald.txt" || echo "WARNING: No good entries found in journald logs for node ${node}" >&2
+        grep -i -E "${bad[*]}" "${ETCD_LOG_PATH}/${node}/journald_filtered.txt" && echo "ERROR: Found bad entries in journald logs for node ${node}" >&2 || true
+        grep -i -E "${good[*]}" "${ETCD_LOG_PATH}/${node}/journald_filtered.txt" || echo "WARNING: No good entries found in journald logs for node ${node}" >&2
     done
 }
 
