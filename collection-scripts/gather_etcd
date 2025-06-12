@@ -42,7 +42,8 @@ function ocp4nodes {
     for node in ${ALL_CP_NODES}; do
         mkdir -p ${ETCD_LOG_PATH}/${node}
         echo "INFO: Gathering journald logs from node ${node}"
-        oc debug "$node" -- chroot /host journalctl -u chronyd | grep -i -E "${bad[*]}" > "${ETCD_LOG_PATH}/${node}/journald.txt" 2>&1 || true
+        bad_regex=$(IFS='|'; echo "${bad[*]}")
+        oc debug "$node" -- chroot /host journalctl -u chronyd | grep -i -E "$bad_regex" > "${ETCD_LOG_PATH}/${node}/journald.txt" 2>&1 || true
 
         grep -i -E "${good[*]}" "${ETCD_LOG_PATH}/${node}/journald_filtered.txt" || echo "WARNING: No good entries found in journald logs for node ${node}" >&2
     done
